@@ -47,7 +47,7 @@ jobs:
     
     # 构建 APK
     - name: Build APK
-      run: flutter build apk --release
+      run: flutter build apk --release --target-platform=android-arm64
     
     # 上传 APK 作为 artifact
     - name: Upload APK
