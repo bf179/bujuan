@@ -1,0 +1,58 @@
+name: Flutter APK Build and Upload
+
+on:
+  workflow_dispatch:  # 允许手动触发
+    inputs:
+      build-type:
+        description: 'Build type (apk, appbundle, etc)'
+        required: true
+        default: 'apk'
+        type: choice
+        options:
+        - apk
+        - appbundle
+      flavor:
+        description: 'Product flavor (optional)'
+        required: false
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # 获取所有历史记录和分支
+    
+    # 设置 Java 环境
+    - uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'  # 使用 Azul Zulu JDK
+        java-version: '17'
+    
+    # 设置 Flutter 环境
+    - uses: subosito/flutter-action@v2
+      with:
+        flutter-version: 'stable'  # 使用稳定版 Flutter
+        channel: 'stable'
+    
+    # 获取依赖
+    - name: Get Flutter dependencies
+      run: flutter pub get
+    
+    # 检查 Flutter 环境
+    - name: Flutter doctor
+      run: flutter doctor -v
+    
+    # 构建 APK
+    - name: Build APK
+      run: flutter build apk --release
+    
+    # 上传 APK 作为 artifact
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-apk
+        path: build/app/outputs/flutter-apk/app-release.apk
+        retention-days: 5  # 保留5天
